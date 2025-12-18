@@ -4,7 +4,6 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/entities/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/create_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/create_article_event.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/create_article_state.dart';
-import 'package:intl/intl.dart';
 
 class CreateArticlePage extends StatefulWidget {
   const CreateArticlePage({Key? key}) : super(key: key);

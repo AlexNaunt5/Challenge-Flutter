@@ -11,7 +11,6 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/create_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_bloc.dart';
-import 'features/daily_news/data/data_sources/local/app_database.dart';
 import 'features/daily_news/domain/usecases/get_saved_article.dart';
 import 'features/daily_news/domain/usecases/remove_article.dart';
 import 'features/daily_news/domain/usecases/save_article.dart';
@@ -21,8 +20,9 @@ final sl = GetIt.instance;
 
 Future<void> initializeDependencies() async {
 
-  final database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
-  sl.registerSingleton<AppDatabase>(database);
+  // TODO: Implement Floor database when needed
+  // final database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+  // sl.registerSingleton<AppDatabase>(database);
   
   // Dio
   sl.registerSingleton<Dio>(Dio());
@@ -39,7 +39,7 @@ Future<void> initializeDependencies() async {
   );
 
   sl.registerSingleton<ArticleRepository>(
-    ArticleRepositoryImpl(sl(), sl(), sl())
+    ArticleRepositoryImpl(sl(), sl())
   );
   
   // UseCases

@@ -70,7 +70,7 @@ class ArticleDetailsView extends HookWidget {
               const Icon(Ionicons.time_outline, size: 16),
               const SizedBox(width: 4),
               Text(
-                article!.publishedAt!,
+                article!.publishedAt?.toString() ?? 'Unknown date',
                 style: const TextStyle(fontSize: 12),
               ),
             ],

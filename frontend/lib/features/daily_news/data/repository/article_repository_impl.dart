@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:news_app_clean_architecture/core/constants/constants.dart';
-import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/local/app_database.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/remote/article_remote_data_source.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/models/article.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
@@ -14,12 +13,10 @@ import '../data_sources/remote/news_api_service.dart';
 
 class ArticleRepositoryImpl implements ArticleRepository {
   final NewsApiService _newsApiService;
-  final AppDatabase _appDatabase;
   final ArticleRemoteDataSource? _articleRemoteDataSource;
   
   ArticleRepositoryImpl(
-    this._newsApiService,
-    this._appDatabase, [
+    this._newsApiService, [
     this._articleRemoteDataSource,
   ]);
   
@@ -37,10 +34,10 @@ class ArticleRepositoryImpl implements ArticleRepository {
       } else {
         return DataFailed(
           DioError(
-            error: httpResponse.response.statusMessage,
+            requestOptions: httpResponse.response.requestOptions,
             response: httpResponse.response,
             type: DioErrorType.response,
-            requestOptions: httpResponse.response.requestOptions
+            error: httpResponse.response.statusMessage,
           )
         );
       }
@@ -51,17 +48,20 @@ class ArticleRepositoryImpl implements ArticleRepository {
 
   @override
   Future<List<ArticleModel>> getSavedArticles() async {
-    return _appDatabase.articleDAO.getArticles();
+    // TODO: Implement local database storage
+    return [];
   }
 
   @override
-  Future<void> removeArticle(ArticleEntity article) {
-    return _appDatabase.articleDAO.deleteArticle(ArticleModel.fromEntity(article));
+  Future<void> removeArticle(ArticleEntity article) async {
+    // TODO: Implement local database removal
+    return;
   }
 
   @override
-  Future<void> saveArticle(ArticleEntity article) {
-    return _appDatabase.articleDAO.insertArticle(ArticleModel.fromEntity(article));
+  Future<void> saveArticle(ArticleEntity article) async {
+    // TODO: Implement local database save
+    return;
   }
 
   @override
@@ -71,11 +71,13 @@ class ArticleRepositoryImpl implements ArticleRepository {
         // Use Firestore if available
         await _articleRemoteDataSource!.createArticle(ArticleModel.fromEntity(article));
       }
-      // Also save to local database
-      await _appDatabase.articleDAO.insertArticle(ArticleModel.fromEntity(article));
       return const DataSuccess(null);
     } catch(e) {
-      return DataFailed(Exception(e));
+      return DataFailed(DioError(
+        error: e.toString(),
+        type: DioErrorType.other,
+        requestOptions: RequestOptions(path: ''),
+      ));
     }
   }
 
@@ -90,12 +92,13 @@ class ArticleRepositoryImpl implements ArticleRepository {
           return DataSuccess(articles);
         }
       }
-      
-      // Fallback to local database
-      final articles = await _appDatabase.articleDAO.getArticles();
-      return DataSuccess(articles);
+      return const DataSuccess([]);
     } catch(e) {
-      return DataFailed(Exception(e));
+      return DataFailed(DioError(
+        error: e.toString(),
+        type: DioErrorType.other,
+        requestOptions: RequestOptions(path: ''),
+      ));
     }
   }
 
@@ -105,10 +108,13 @@ class ArticleRepositoryImpl implements ArticleRepository {
       if (_articleRemoteDataSource != null) {
         await _articleRemoteDataSource!.updateArticle(ArticleModel.fromEntity(article));
       }
-      await _appDatabase.articleDAO.insertArticle(ArticleModel.fromEntity(article));
       return const DataSuccess(null);
     } catch(e) {
-      return DataFailed(Exception(e));
+      return DataFailed(DioError(
+        error: e.toString(),
+        type: DioErrorType.other,
+        requestOptions: RequestOptions(path: ''),
+      ));
     }
   }
 
@@ -120,7 +126,11 @@ class ArticleRepositoryImpl implements ArticleRepository {
       }
       return const DataSuccess(null);
     } catch(e) {
-      return DataFailed(Exception(e));
+      return DataFailed(DioError(
+        error: e.toString(),
+        type: DioErrorType.other,
+        requestOptions: RequestOptions(path: ''),
+      ));
     }
   }
   
