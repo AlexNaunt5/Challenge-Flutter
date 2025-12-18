@@ -4,6 +4,8 @@ import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
 import '../../features/daily_news/presentation/pages/home/daily_news.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
+import '../../features/daily_news/presentation/pages/create_article/create_article.dart';
+import '../../features/daily_news/presentation/pages/user_articles/user_articles.dart';
 
 
 class AppRoutes {
@@ -17,6 +19,12 @@ class AppRoutes {
 
       case '/SavedArticles':
         return _materialRoute(const SavedArticles());
+
+      case '/CreateArticle':
+        return _materialRoute(const CreateArticlePage());
+
+      case '/UserArticles':
+        return _materialRoute(const UserArticlesPage());
         
       default:
         return _materialRoute(const DailyNews());
@@ -27,3 +35,4 @@ class AppRoutes {
     return MaterialPageRoute(builder: (_) => view);
   }
 }
+
