@@ -23,6 +23,13 @@ class DailyNews extends StatelessWidget {
       ),
       actions: [
         GestureDetector(
+          onTap: () => _onShowUserArticlesViewTapped(context),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14),
+            child: Icon(Icons.edit, color: Colors.black),
+          ),
+        ),
+        GestureDetector(
           onTap: () => _onShowSavedArticlesViewTapped(context),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
@@ -71,7 +78,7 @@ class DailyNews extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: REPLACE ROUTE WITH YOUR "ADD ARTICLE" PAGE
+          Navigator.pushNamed(context, '/CreateArticle');
         },
         child: const Icon(Icons.add),
       ),
@@ -84,5 +91,9 @@ class DailyNews extends StatelessWidget {
 
   void _onShowSavedArticlesViewTapped(BuildContext context) {
     Navigator.pushNamed(context, '/SavedArticles');
+  }
+
+  void _onShowUserArticlesViewTapped(BuildContext context) {
+    Navigator.pushNamed(context, '/UserArticles');
   }
 }

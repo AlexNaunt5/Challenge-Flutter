@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": // TODO: ADD PROJECT ID
+    "default": "symmetry-news-app-7c7d4"
   },
   "targets": {},
   "etags": {}

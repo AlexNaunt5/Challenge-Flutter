@@ -2,6 +2,169 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TODO: WRITE ANY NECESSARY FIRESTORE RULES HERE
+    // ============================================================================
+    // HELPER FUNCTIONS
+    // ============================================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+    
+    // Validate article document structure
+    function isValidArticle() {
+      let hasRequiredFields = request.resource.data.keys().hasAll([
+        'id', 'title', 'description', 'content', 'author', 'source', 
+        'publishedAt', 'createdAt', 'updatedAt', 'createdBy', 
+        'isUserGenerated', 'isSaved', 'status'
+      ]);
+      
+      let hasValidTypes = 
+        request.resource.data.id is string &&
+        request.resource.data.title is string &&
+        request.resource.data.description is string &&
+        request.resource.data.content is string &&
+        request.resource.data.author is string &&
+        request.resource.data.source is string &&
+        request.resource.data.publishedAt is timestamp &&
+        request.resource.data.createdAt is timestamp &&
+        request.resource.data.updatedAt is timestamp &&
+        request.resource.data.createdBy is string &&
+        request.resource.data.isUserGenerated is bool &&
+        request.resource.data.isSaved is bool &&
+        request.resource.data.status is string;
+        
+      let validStatuses = request.resource.data.status in ['published', 'draft', 'archived'];
+      let validSources = request.resource.data.source in ['NewsAPI', 'User-Generated'];
+      
+      return hasRequiredFields && hasValidTypes && validStatuses && validSources;
+    }
+    
+    // ============================================================================
+    // ARTICLES COLLECTION RULES
+    // ============================================================================
+    
+    match /articles/{articleId} {
+      // READ RULES
+      allow read: if isAuthenticated();
+      
+      // CREATE RULES
+      allow create: if isAuthenticated() && 
+                       isValidArticle() && 
+                       request.resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.isUserGenerated == true;
+      
+      // UPDATE RULES
+      allow update: if isAuthenticated() && 
+                       (isOwner(resource.data.createdBy) || isAdmin()) &&
+                       isValidArticle() &&
+                       request.resource.data.createdBy == resource.data.createdBy;
+      
+      // DELETE RULES
+      allow delete: if isAuthenticated() && 
+                       (isAdmin() || isOwner(resource.data.createdBy));
+      
+      // ========================================================================
+      // USER ARTICLES SUBCOLLECTION RULES
+      // ========================================================================
+      
+      match /userArticles/{userId} {
+        // READ RULES - User can only read their own records
+        allow read: if isAuthenticated() && isOwner(userId);
+        
+        // CREATE RULES
+        allow create: if isAuthenticated() && 
+                         isOwner(userId) &&
+                         request.resource.data.userId == userId &&
+                         request.resource.data.savedAt is timestamp &&
+                         (request.resource.data.readCount is int || !('readCount' in request.resource.data.keys()));
+        
+        // UPDATE RULES
+        allow update: if isAuthenticated() && 
+                         isOwner(userId);
+        
+        // DELETE RULES
+        allow delete: if isAuthenticated() && 
+                         isOwner(userId);
+      }
+    }
+    
+    // ============================================================================
+    // USER PROFILES COLLECTION RULES (Optional - For Future Enhancement)
+    // ============================================================================
+    
+    match /userProfiles/{userId} {
+      // READ RULES - Public read for all authenticated users
+      allow read: if isAuthenticated();
+      
+      // CREATE RULES - Users can only create their own profile
+      allow create: if isAuthenticated() && 
+                       isOwner(userId) &&
+                       request.resource.data.userId == userId &&
+                       request.resource.data.joinedAt is timestamp;
+      
+      // UPDATE RULES - Users can only update their own profile
+      allow update: if isAuthenticated() && 
+                       isOwner(userId);
+      
+      // DELETE RULES - Only admin can delete profiles
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================================================
+    // DEFAULT DENY ALL
+    // ============================================================================
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // ========================================================================
+    // AUTHENTICATION CHECK
+    // ========================================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+    
+    // ========================================================================
+    // MEDIA/ARTICLES FOLDER RULES
+    // ========================================================================
+    
+    match /media/articles/{fileName} {
+      // READ: Allow all authenticated users to read article images
+      allow read: if isAuthenticated();
+      
+      // WRITE: Allow authenticated users to upload only
+      allow write: if isAuthenticated() &&
+                      request.resource.size < 10 * 1024 * 1024 && // Max 10MB
+                      request.resource.contentType.matches('image/.*'); // Images only
+      
+      // DELETE: Allow authenticated users to delete
+      allow delete: if isAuthenticated();
+    }
+    
+    // ========================================================================
+    // DEFAULT DENY ALL
+    // ========================================================================
+    
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
   }
 }
