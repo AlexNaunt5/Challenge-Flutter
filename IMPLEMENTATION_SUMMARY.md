@@ -191,16 +191,6 @@ docs/
 
 ---
 
-## 🐛 Problemas Conocidos & Soluciones
-
-| Problema | Solución | Estado |
-|---|---|---|
-| Firebase Auth no implementado | Usar mock userId | ⚠️ Implementar pronto |
-| Upload de imágenes no implementado | URL de imágenes como texto | ⏳ Siguiente fase |
-| Edición inline de artículos | UI lista en carpeta, activar cuando sea necesario | 📋 Backlog |
-
----
-
 ## 📚 Recursos Útiles
 
 - [DB Schema Documentation](backend/docs/DB_SCHEMA.md)
