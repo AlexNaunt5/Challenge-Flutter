@@ -1,0 +1,30 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub/
+build/
+flutter_*.png
+
+# Android related
+**/android/app/google-services.json
+**/android/app/google-services.plist
+
+# iOS related
+**/ios/Runner/GoogleService-Info.plist
+
+# VS Code related
+.vscode/
+
+# Misc
+*.iml
+.idea/
+*.log
+
+# macOS related
+**/macos/Runner/GoogleService-Info.plist
+
+# Windows related
+**/windows/Runner/GoogleService-Info.plist
+
+# Linux related
+**/linux/Runner/GoogleService-Info.plist
